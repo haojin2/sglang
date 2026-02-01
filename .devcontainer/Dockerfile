@@ -14,10 +14,10 @@ RUN apt-get update && apt-get install -y sudo && \
     apt-get clean
 
 # Set up oh-my-zsh for devuser
-RUN cp -r /root/.oh-my-zsh /home/devuser/.oh-my-zsh && \
-    cp /root/.zshrc /home/devuser/.zshrc && \
-    cp /root/.vimrc /home/devuser/.vimrc && \
-    cp /root/.tmux.conf /home/devuser/.tmux.conf && \
+RUN for f in .zshrc .vimrc .tmux.conf; do \
+        [ -f /root/$f ] && cp /root/$f /home/devuser/$f; \
+    done && \
+    cp -r /root/.oh-my-zsh /home/devuser/.oh-my-zsh && \
     sed -i 's|/root/.oh-my-zsh|/home/devuser/.oh-my-zsh|g' /home/devuser/.zshrc && \
     chown -R devuser:devuser /home/devuser/
 
