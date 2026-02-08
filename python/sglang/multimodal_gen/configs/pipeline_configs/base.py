@@ -736,10 +736,17 @@ class ImagePipelineConfig(PipelineConfig):
             )
             latents = torch.cat([latents, pad], dim=1)
 
-        sharded_tensor = rearrange(
-            latents, "b (n s) d -> b n s d", n=sp_world_size
-        ).contiguous()
-        sharded_tensor = sharded_tensor[:, rank_in_sp_group, :, :]
+        sharded_tensor = None
+        if latents.ndim == 3:
+            sharded_tensor = rearrange(
+                latents, "b (n s) d -> b n s d", n=sp_world_size
+            ).contiguous()
+            sharded_tensor = sharded_tensor[:, rank_in_sp_group, :, :]
+        if latents.ndim == 3:
+            sharded_tensor = rearrange(
+                latents, "b c (n s) w -> b c n (s w)", n=sp_world_size
+            ).contiguous()
+
         return sharded_tensor, True
 
     def gather_latents_for_sp(self, latents):
